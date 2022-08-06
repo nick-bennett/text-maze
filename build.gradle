@@ -1,0 +1,30 @@
+plugins {
+    id 'application'
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(11)
+    }
+}
+
+application {
+    mainClass = 'com.nickbenn.maze.Main'
+}
+
+group 'com.nickbenn'
+version '1.0.0'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    def junitVersion = '5.9.0'
+    testImplementation "org.junit.jupiter:junit-jupiter-api:$junitVersion"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
+}
+
+test {
+    useJUnitPlatform()
+}
