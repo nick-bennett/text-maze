@@ -16,13 +16,13 @@ import java.util.stream.Collectors;
 
 public final class Maze {
 
-  private static final String CELL_STRING_REPRESENTATION_FORMAT =
-      "%1$s{row=%2$d, column=%3$d, walls=%4$s}";
+  private static final String CELL_STRING_FORMAT = "%1$s{row=%2$d, column=%3$d, walls=%4$s}";
 
   private final int width;
   private final int height;
   private final Random rng;
   private final Cell[][] cells;
+  private final Set<Cell> termini;
 
   public Maze(int width, int height, Random rng) {
     this.width = width;
@@ -30,7 +30,7 @@ public final class Maze {
     this.rng = rng;
     cells = setupCells(width, height);
     buildMaze();
-    findTermina();
+    termini = findTermini();
   }
 
   public int getWidth() {
@@ -48,6 +48,10 @@ public final class Maze {
         .toArray(Cell[][]::new);
   }
 
+  public Set<Cell> getTermini() {
+    return termini;
+  }
+
   private Cell[][] setupCells(int width, int height) {
     final Cell[][] cells;
     cells = new Cell[height][width];
@@ -63,21 +67,12 @@ public final class Maze {
     cells[rng.nextInt(cells.length)][rng.nextInt(cells[0].length)].extend();
   }
 
-  private void findTermina() {
-    Cell farthest = cells[0][0];
-    int maxDistance = 0;
-    while (true) {
-      Cell candidate = floodFill(farthest);
-      int candidateDistance = candidate.getFloodDistance();
-      if (candidateDistance > maxDistance) {
-        farthest = candidate;
-        maxDistance = candidateDistance;
-      } else {
-        farthest.setTerminus(true);
-        candidate.setTerminus(true);
-        break;
-      }
-    };
+  private Set<Cell> findTermini() {
+    Cell terminus1 = floodFill(cells[0][0]);
+    terminus1.setTerminus(true);
+    Cell terminus2 = floodFill(terminus1);
+    terminus2.setTerminus(true);
+    return Set.of(terminus1, terminus2);
   }
 
   private Cell floodFill(Cell origin) {
@@ -153,7 +148,7 @@ public final class Maze {
 
     @Override
     public String toString() {
-      return String.format(CELL_STRING_REPRESENTATION_FORMAT,
+      return String.format(CELL_STRING_FORMAT,
           getClass().getSimpleName(), row, column, walls);
     }
 

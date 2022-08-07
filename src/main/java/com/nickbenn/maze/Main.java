@@ -7,7 +7,7 @@ import java.security.SecureRandom;
 public class Main {
 
   public static void main(String[] args) {
-    Maze maze = new Maze(20, 20, new SecureRandom());
+    Maze maze = new Maze(30, 30, new SecureRandom());
     TextMaze view = new TextMaze(maze);
     for (String line : view.getRepresentation(5, 2)) {
       System.out.println(line);
