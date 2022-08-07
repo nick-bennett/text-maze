@@ -24,6 +24,7 @@ public class TextMaze {
   private static final char NORTH_WALL_CHAR = '\u2501';
   private static final char WEST_WALL_CHAR = '\u2503';
   private static final char NO_WALL_CHAR = ' ';
+  private static final char TERMINUS_CHAR = '\u2592';
   private static final Map<Set<Direction>, Character> CORNER_CHARACTERS = Map.ofEntries(
       Map.entry(EnumSet.noneOf(Direction.class), NO_WALL_CHAR),
       Map.entry(EnumSet.of(Direction.NORTH), '\u2578'),
@@ -93,14 +94,16 @@ public class TextMaze {
     for (int columnIndex = 0; columnIndex < mazeWidth; columnIndex++) {
       wallSets[1][columnIndex + 1] =
           bottomRow ? NORTH_WALL : cells[rowIndex][columnIndex].getWalls();
-      rowChars[columnIndex] = computeCharacters(wallSets, columnIndex);
+      rowChars[columnIndex] = computeCharacters(wallSets, columnIndex,
+          rowIndex < mazeHeight && cells[rowIndex][columnIndex].isTerminus());
     }
     wallSets[1][wallSets[1].length - 1] = bottomRow ? NO_WALLS : WEST_WALL;
-    rowChars[mazeWidth] = computeCharacters(wallSets, mazeWidth);
+    rowChars[mazeWidth] = computeCharacters(wallSets, mazeWidth, false);
     return rowChars;
   }
 
-  private static CellCharacters computeCharacters(Set<Direction>[][] wallSets, int columnIndex) {
+  private static CellCharacters computeCharacters(
+      Set<Direction>[][] wallSets, int columnIndex, boolean terminus) {
     Set<Direction> current = wallSets[1][columnIndex + 1];
     Set<Direction> cornerWalls = Stream
         .of(
@@ -114,7 +117,8 @@ public class TextMaze {
     char topLeftChar = CORNER_CHARACTERS.get(cornerWalls);
     char topChar = current.contains(Direction.NORTH) ? NORTH_WALL_CHAR : NO_WALL_CHAR;
     char leftChar = current.contains(Direction.WEST) ? WEST_WALL_CHAR : NO_WALL_CHAR;
-    return new CellCharacters(topLeftChar, topChar, leftChar);
+    char fillChar = terminus ? TERMINUS_CHAR : NO_WALL_CHAR;
+    return new CellCharacters(topLeftChar, topChar, leftChar, fillChar);
   }
 
   private String[] buildRepresentation() {
@@ -122,9 +126,7 @@ public class TextMaze {
     for (int rowIndex = 0; rowIndex < wallChars.length - 1; rowIndex++) {
       representation.add(singleLine(rowIndex, true));
       String line = singleLine(rowIndex, false);
-      for (int verticalSpacerIndex = 0;
-          verticalSpacerIndex < cellCharHeight - 1;
-          verticalSpacerIndex++) {
+      for (int spacerIndex = 0; spacerIndex < cellCharHeight - 1; spacerIndex++) {
         representation.add(line);
       }
     }
@@ -138,7 +140,7 @@ public class TextMaze {
     for (int columnIndex = 0; columnIndex < wallChars[rowIndex].length - 1; columnIndex++) {
       CellCharacters current = wallChars[rowIndex][columnIndex];
       builder.append(onWall ? current.topLeft : current.left);
-      Arrays.fill(spacer, onWall ? current.top : NO_WALL_CHAR);
+      Arrays.fill(spacer, onWall ? current.top : current.fill);
       builder.append(spacer);
     }
     CellCharacters last = wallChars[rowIndex][wallChars[rowIndex].length - 1];
@@ -151,11 +153,13 @@ public class TextMaze {
     private final char topLeft;
     private final char top;
     private final char left;
+    private final char fill;
 
-    private CellCharacters(char topLeft, char top, char left) {
+    private CellCharacters(char topLeft, char top, char left, char fill) {
       this.topLeft = topLeft;
       this.top = top;
       this.left = left;
+      this.fill = fill;
     }
 
   }
