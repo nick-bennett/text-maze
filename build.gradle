@@ -12,19 +12,33 @@ application {
     mainClass = 'com.nickbenn.maze.Main'
 }
 
-group 'com.nickbenn'
-version '1.0.0'
-
 repositories {
     mavenCentral()
 }
 
 dependencies {
+
+    // Apache Commons Command-line Interface (CLI) library
+    implementation 'commons-cli:commons-cli:1.5.0'
+
+    // JUnit5 unit testing libraries
     def junitVersion = '5.9.0'
     testImplementation "org.junit.jupiter:junit-jupiter-api:$junitVersion"
     testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
+
 }
 
 test {
     useJUnitPlatform()
+}
+
+clean {
+    delete += file("$projectDir/docs/api")
+}
+
+javadoc {
+    destinationDir = file("$projectDir/docs/api")
+    options {
+        links "https://docs.oracle.com/en/java/javase/11/docs/api/"
+    }
 }
